@@ -29,8 +29,8 @@ SELECT
     r.Month_Number,
     r.Month_Name,
     r.Total_Revenue,
-    e.Total_Expenses,
-    (r.Total_Revenue - e.Total_Expenses) AS Profit
+    COALESCE(e.Total_Expenses, 0) AS Total_Expenses,
+    (r.Total_Revenue - COALESCE(e.Total_Expenses, 0)) AS Profit
 FROM
 (
     SELECT 
@@ -40,7 +40,7 @@ FROM
     FROM payments
     GROUP BY YEAR(Payment_date), MONTH(Payment_date), MONTHNAME(Payment_date)
 ) r
-JOIN
+LEFT JOIN
 (
     SELECT 
         YEAR(Date) AS Year, MONTH(Date) AS Month_Number,
@@ -58,9 +58,9 @@ SELECT
     r.Month_Number,
     r.Month_Name,
     r.Total_Revenue,
-    e.Total_Expenses,
-    (r.Total_Revenue - e.Total_Expenses) AS Profit,
-    ROUND(((r.Total_Revenue - e.Total_Expenses) / r.Total_Revenue) * 100, 2) AS Profit_Margin_Percent
+    COALESCE(e.Total_Expenses, 0) AS Total_Expenses,
+    (r.Total_Revenue - COALESCE(e.Total_Expenses, 0)) AS Profit,
+    ROUND(((r.Total_Revenue - COALESCE(e.Total_Expenses, 0)) / r.Total_Revenue) * 100, 2) AS Profit_Margin_Percent
 FROM
 (
     SELECT 
@@ -70,7 +70,7 @@ FROM
     FROM payments
     GROUP BY YEAR(Payment_date), MONTH(Payment_date), MONTHNAME(Payment_date)
 ) r
-JOIN
+LEFT JOIN
 (
     SELECT 
         YEAR(Date) AS Year, MONTH(Date) AS Month_Number,
@@ -194,9 +194,9 @@ SELECT
     r.Month_Number,
     r.Month_Name,
     r.Total_Revenue,
-    e.Total_Expenses,
-    (r.Total_Revenue - e.Total_Expenses) AS Profit,
-    ROUND(((r.Total_Revenue - e.Total_Expenses) / r.Total_Revenue) * 100, 2) AS Profit_Margin_Percent,
+    COALESCE(e.Total_Expenses, 0) AS Total_Expenses,
+    (r.Total_Revenue - COALESCE(e.Total_Expenses, 0)) AS Profit,
+    ROUND(((r.Total_Revenue - COALESCE(e.Total_Expenses, 0)) / r.Total_Revenue) * 100, 2) AS Profit_Margin_Percent,
     IFNULL(o.Pending_Amount, 0) AS Pending_Collections
 FROM
 (
@@ -207,7 +207,7 @@ FROM
     FROM payments
     GROUP BY YEAR(Payment_date), MONTH(Payment_date), MONTHNAME(Payment_date)
 ) r
-JOIN
+LEFT JOIN
 (
     SELECT 
         YEAR(Date) AS Year, MONTH(Date) AS Month_Number,
