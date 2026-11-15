@@ -136,7 +136,7 @@ INSERT INTO `customer` (`Customer_ID`, `Name`, `Email`, `Phone`) VALUES
 --
 DELIMITER $$
 CREATE TRIGGER `log_deleted_customer` AFTER DELETE ON `customer` FOR EACH ROW BEGIN
-    INSERT INTO Deleted_Log (Table_Name, Record_ID, Deleted_Data)
+    INSERT INTO `deleted_log` (Table_Name, Record_ID, Deleted_Data)
     VALUES (
         'Customer',
         OLD.Customer_ID,
@@ -200,7 +200,7 @@ INSERT INTO `employee` (`Employee_ID`, `Employee_name`, `Phone`, `Role`, `Hire_d
 --
 DELIMITER $$
 CREATE TRIGGER `log_deleted_employee` AFTER DELETE ON `employee` FOR EACH ROW BEGIN
-    INSERT INTO Deleted_Log (Table_Name, Record_ID, Deleted_Data)
+    INSERT INTO `deleted_log` (Table_Name, Record_ID, Deleted_Data)
     VALUES (
         'Employee',
         OLD.Employee_ID,
@@ -455,7 +455,7 @@ INSERT INTO `product` (`Product_ID`, `Product_name`, `Price`) VALUES
 --
 DELIMITER $$
 CREATE TRIGGER `log_deleted_product` AFTER DELETE ON `product` FOR EACH ROW BEGIN
-    INSERT INTO Deleted_Log (Table_Name, Record_ID, Deleted_Data)
+    INSERT INTO `deleted_log` (Table_Name, Record_ID, Deleted_Data)
     VALUES (
         'Product',
         OLD.Product_ID,

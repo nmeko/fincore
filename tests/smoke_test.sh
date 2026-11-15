@@ -37,6 +37,10 @@ check "negative sale quantity is rejected" "$(curl -s -L -b "$JAR" -c "$JAR" --d
 T=$(token customers.php)
 check "deleting a customer with sales shows a friendly error" "$(curl -s -L -b "$JAR" -c "$JAR" --data-urlencode "csrf=$T" -d 'action=delete&id=1' "$BASE/customers.php" | grep -c 'other records still refer')" 1
 
+EVE=$(curl -s -b "$JAR" "$BASE/customers.php?q=eve%40example.com" | grep -o 'name="id" value="[0-9]*"' | head -1 | grep -o '[0-9][0-9]*')
+T=$(token customers.php)
+check "deleting a customer without sales works" "$(curl -s -L -b "$JAR" -c "$JAR" --data-urlencode "csrf=$T" -d "action=delete&id=$EVE" "$BASE/customers.php" | grep -c 'Customer deleted')" 1
+
 check "logout by GET is ignored" "$(curl -s -o /dev/null -w '%{redirect_url}' -b "$JAR" "$BASE/logout.php" | grep -c index.php)" 1
 T=$(token index.php)
 code --data-urlencode "csrf=$T" "$BASE/logout.php" >/dev/null
