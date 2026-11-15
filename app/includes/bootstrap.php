@@ -100,8 +100,9 @@ set_exception_handler(function (Throwable $ex) {
 function db_error(Throwable $ex): string
 {
     $code = $ex instanceof mysqli_sql_exception ? $ex->getCode() : 0;
-    if ($code === 1451) return 'Cannot delete: other records still refer to this one.';
-    if ($code === 1452) return 'That linked record does not exist.';
+    // MySQL 8 sends 1217/1216 instead of 1451/1452 to users without table-level grants.
+    if ($code === 1451 || $code === 1217) return 'Cannot delete: other records still refer to this one.';
+    if ($code === 1452 || $code === 1216) return 'That linked record does not exist.';
     if ($code === 1644) return $ex->getMessage(); // raised on purpose by a trigger's SIGNAL
     error_log('FinCore query failed: ' . $ex->getMessage());
     return 'Something went wrong while saving. Please check the values and try again.';
