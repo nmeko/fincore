@@ -1,0 +1,4 @@
+# Keep Linux line endings so scripts and SQL work on any server, even when edited on Windows.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
