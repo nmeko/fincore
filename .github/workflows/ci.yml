@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: fincore
+        ports: ["3306:3306"]
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mysqli
+      - name: Lint PHP
+        run: for f in $(find app -name '*.php'); do php -l "$f"; done
+      - name: Load database
+        run: |
+          mysql -h127.0.0.1 -uroot -proot fincore < database/fincore.sql
+          mysql -h127.0.0.1 -uroot -proot -e "CREATE USER 'fincore_app'@'%' IDENTIFIED BY 'ci'; GRANT SELECT,INSERT,UPDATE,DELETE ON fincore.* TO 'fincore_app'@'%';"
+      - name: Reporting queries run
+        run: for f in database/queries/*.sql; do mysql -h127.0.0.1 -uroot -proot fincore < "$f" > /dev/null; done
+      - name: Smoke test
+        run: |
+          HASH=$(php -r 'echo password_hash("ci-password", PASSWORD_DEFAULT);')
+          cat > app/config.php <<EOF
+          <?php return ['db_host'=>'127.0.0.1','db_port'=>3306,'db_name'=>'fincore','db_user'=>'fincore_app','db_pass'=>'ci','admin_user'=>'admin','admin_password_hash'=>'$HASH'];
+          EOF
+          php -S 127.0.0.1:8000 -t app > /dev/null 2>&1 &
+          sleep 1
+          tests/smoke_test.sh http://127.0.0.1:8000 admin ci-password
